@@ -13530,7 +13530,10 @@ static void ggml_cl_add(ggml_backend_t backend, const ggml_tensor * src0, const 
 
     cl_kernel kernel;
 
-    const bool bcast_row = ggml_nelements(src1) == ne10 && ggml_is_contiguous(src1) && ne00 % 4 == 0 && ne10 % 4 == 0;
+    // The row kernel indexes src0 and dst as contiguous; anything else, such as a
+    // bias added to a view, takes the general kernel, which follows the strides.
+    const bool bcast_row = ggml_nelements(src1) == ne10 && ggml_is_contiguous(src1) && ne00 % 4 == 0 && ne10 % 4 == 0 &&
+                           ggml_is_contiguous(src0) && ggml_is_contiguous(dst);
 
     if (bcast_row) {
         GGML_ASSERT(ggml_is_contiguous(src0));
@@ -13782,7 +13785,8 @@ static void ggml_cl_mul(ggml_backend_t backend, const ggml_tensor * src0, const 
     bool bcast_row = false;
     cl_kernel kernel;
 
-    if (ggml_nelements(src1) == ne10 && ggml_is_contiguous(src1) && ne00 % 4 == 0 && ne10 % 4 == 0) {
+    if (ggml_nelements(src1) == ne10 && ggml_is_contiguous(src1) && ne00 % 4 == 0 && ne10 % 4 == 0 &&
+        ggml_is_contiguous(src0) && ggml_is_contiguous(dst)) {
         GGML_ASSERT(ggml_is_contiguous(src0));
 
         // src1 is a row
@@ -13915,7 +13919,8 @@ static void ggml_cl_div(ggml_backend_t backend, const ggml_tensor * src0, const 
     bool bcast_row = false;
     cl_kernel kernel;
 
-    if (ggml_nelements(src1) == ne10 && ggml_is_contiguous(src1) && ne00 % 4 == 0 && ne10 % 4 == 0) {
+    if (ggml_nelements(src1) == ne10 && ggml_is_contiguous(src1) && ne00 % 4 == 0 && ne10 % 4 == 0 &&
+        ggml_is_contiguous(src0) && ggml_is_contiguous(dst)) {
         GGML_ASSERT(ggml_is_contiguous(src0));
 
         // src1 is a row
@@ -14036,7 +14041,8 @@ static void ggml_cl_sub(ggml_backend_t backend, const ggml_tensor * src0, const 
     bool bcast_row = false;
     cl_kernel kernel;
 
-    if (ggml_nelements(src1) == ne10 && ggml_is_contiguous(src1) && ne00 % 4 == 0 && ne10 % 4 == 0) {
+    if (ggml_nelements(src1) == ne10 && ggml_is_contiguous(src1) && ne00 % 4 == 0 && ne10 % 4 == 0 &&
+        ggml_is_contiguous(src0) && ggml_is_contiguous(dst)) {
         GGML_ASSERT(ggml_is_contiguous(src0));
 
         // src1 is a row
