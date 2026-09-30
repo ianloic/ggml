@@ -252,6 +252,13 @@ void main() {
         pos_b_ib += BK_STEP;
 
         for (uint k_step = 0; k_step < BK_STEP; k_step++) {
+            // Past the end of K, buf_a wasn't loaded for this step. With K
+            // under a whole step, nothing in this workgroup ever wrote it, and
+            // an Inf or NaN scale left in shared memory turns the zeroed
+            // buf_b's 0 into NaN. The bound is uniform, so stop here.
+            if (block + k_step * BK >= end_k) {
+                break;
+            }
             // Load from shared into cache
             [[unroll]] for (uint wsir = 0; wsir < WMITER; wsir++) {
                 [[unroll]] for (uint cr = 0; cr < TM; cr++) {

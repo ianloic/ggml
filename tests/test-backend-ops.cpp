@@ -9991,6 +9991,11 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
     test_cases.emplace_back(new test_mul_mat(GGML_TYPE_F32, GGML_TYPE_F32, 32, 509, 2112, {1, 1}, {1, 1}));
     test_cases.emplace_back(new test_mul_mat(GGML_TYPE_Q8_0, GGML_TYPE_F32, 32, 509, 2112, {1, 1}, {1, 1}));
 
+    // K under one step of Vulkan's mul_mmq, which loads four blocks of 32 at a time
+    for (int64_t k : {32, 64, 96}) {
+        test_cases.emplace_back(new test_mul_mat(GGML_TYPE_Q8_0, GGML_TYPE_F32, 96, 64, k, {1, 1}, {1, 1}));
+    }
+
 #if 0
     {
         // Test paths in OpenCL
