@@ -4043,6 +4043,14 @@ vk_device ggml_vk_get_device(size_t idx) {
         device->subgroup_size = subgroup_props.subgroupSize;
         device->subgroup_size_log2 = uint32_t(log2f(float(device->subgroup_size)));
         device->uma = device->properties.deviceType == vk::PhysicalDeviceType::eIntegratedGpu;
+        // On an AMD APU with AMD's own driver (a Ryzen 7 9700X's Radeon on
+        // Windows), a shader can read stale data from device-local,
+        // host-visible memory the host wrote through its mapping, when the
+        // memory had just been freed by another buffer the GPU used: a
+        // model's weights loaded right after another model was freed came
+        // out wrong. A barrier from the host stage doesn't help; writing
+        // through a GPU copy does.
+        device->stage_device_local_writes = device->uma && device->driver_id == vk::DriverId::eAmdProprietary;
         if (sm_builtins) {
             device->shader_core_count = sm_props.shaderSMCount;
         } else if (amd_shader_core_properties2) {

@@ -703,6 +703,8 @@ struct vk_device_struct {
     uint32_t subgroup_size_log2;
     uint32_t shader_core_count;
     bool uma;
+    // Host writes to device-local memory go through a GPU copy instead of the mapping.
+    bool stage_device_local_writes;
     bool prefer_host_memory;
     bool float_controls_rte_fp16;
     bool float_controls_denorm_preserve_fp16;
