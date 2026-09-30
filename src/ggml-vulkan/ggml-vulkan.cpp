@@ -15897,11 +15897,13 @@ static ggml_backend_dev_t ggml_backend_vk_reg_get_device(ggml_backend_reg_t reg,
     return devices[device];
 }
 
+void * ggml_backend_vk_reg_get_proc_address(ggml_backend_reg_t reg, const char * name); // ggml-vulkan-slow-learner.cpp
+
 static const struct ggml_backend_reg_i ggml_backend_vk_reg_i = {
     /* .get_name         = */ ggml_backend_vk_reg_get_name,
     /* .get_device_count = */ ggml_backend_vk_reg_get_device_count,
     /* .get_device       = */ ggml_backend_vk_reg_get_device,
-    /* .get_proc_address = */ NULL,
+    /* .get_proc_address = */ ggml_backend_vk_reg_get_proc_address,
 };
 
 ggml_backend_reg_t ggml_backend_vk_reg() {
